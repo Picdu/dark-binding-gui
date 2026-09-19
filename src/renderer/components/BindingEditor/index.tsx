@@ -3,7 +3,7 @@ import React, { FC, memo } from 'react';
 import { PrimaryBindings } from './PrimaryBindings';
 import { SecondaryBindings } from './SecondaryBindings';
 
-const style = require('./index.scss');
+import style from './index.module.scss';
 
 interface BindingEditorProps {}
 

@@ -2,26 +2,30 @@ import { get, set, cloneDeep, mapValues } from 'lodash';
 
 import { createReducer } from '@utils/create-reducer';
 import { updateInputSettings } from '@utils/parse-binding';
-import store from '@utils/store';
 
 import * as actions from './actions';
 
+// Initial state is hydrated from the main process (groups-load IPC) before
+// the store is created; these are safe empty fallbacks.
 const initialState: GroupsState = {
   hasChanges: false,
-  championGroups: store.get('championGroups', {}),
-  groups: store.get('groups', {}),
+  championGroups: {},
+  groups: {},
 };
 
 export default createReducer(initialState, actions)({
   loadGroups: state => ({
     ...state,
-    championGroups: store.get('championGroups'),
-    groups: store.get('groups'),
+    championGroups: window.__persistedGroups.championGroups,
+    groups: window.__persistedGroups.groups,
     hasChanges: false,
   }),
-  saveGroups: state => {
-    store.set('groups', state.groups);
-    store.set('championGroups', state.championGroups);
+  saveGroups: (state, _payload, _meta) => {
+    const { ipcRenderer } = require('electron');
+    ipcRenderer.send('groups-save', {
+      groups: state.groups,
+      championGroups: state.championGroups,
+    });
 
     return { ...state, hasChanges: false };
   },

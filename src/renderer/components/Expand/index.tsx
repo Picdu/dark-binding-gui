@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import cx from 'classnames';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 interface ExpandProps {
   title?: string;

@@ -6,7 +6,7 @@ import cx from 'classnames';
 import { ChampionTile } from '@components/ChampionTile';
 import withChampionSearch from '../../containers/withChampionSearch';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 interface ChampionSelectorProps {
   champions: Champions;

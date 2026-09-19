@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import cx from 'classnames';
 
-const style = require('./index.scss');
+import style from './index.module.scss';
 
 interface ButtonGroupProps {
   className?: string;

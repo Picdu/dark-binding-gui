@@ -2,7 +2,7 @@ import React, { FC, memo } from 'react';
 import { ipcRenderer } from 'electron';
 import cx from 'classnames';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 const close = () => ipcRenderer.send('window-close');
 const minimize = () => ipcRenderer.send('window-minimize');

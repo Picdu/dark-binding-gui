@@ -10,7 +10,7 @@ import { BindingContext } from '../binding';
 import { Redirect } from 'react-router-dom';
 import { ChampionSelector } from '@components/ChampionSelector';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 interface OuterProps {
   groupName: string;

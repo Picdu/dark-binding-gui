@@ -4,7 +4,7 @@ import cx from 'classnames';
 
 import { ButtonGroup } from '@components/ButtonGroup';
 
-const style = require('./index.scss');
+import style from './index.module.scss';
 
 interface ModalProps {
   className?: any;

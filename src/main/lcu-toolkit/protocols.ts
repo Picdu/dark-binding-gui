@@ -1,26 +1,48 @@
-import { protocol, app, net } from 'electron';
+import { protocol, app } from 'electron';
 import { Readable } from 'stream';
-import { Writable } from 'stream';
-import { ClientRequest, RequestOptions, request as httpRequest } from 'http';
-import { URL } from 'url';
+import { request as httpsRequest } from 'https';
 import { monitor } from './ws';
 import logger from 'electron-log';
 
-// Serve lcu:// URLs to the renderer by proxying them to the LCU HTTPS API
-// with proper Basic auth (URL-embedded credentials are no longer reliable).
+// Scheme must be registered as privileged before app ready (modern Electron
+// replacement for the renderer-side webFrame.registerURLSchemeAsPrivileged).
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'lcu', privileges: { stream: true, supportFetchAPI: true } },
+]);
 
-function toWebReadable(nodeStream: Readable): ReadableStream {
-  return new ReadableStream({
-    start(controller) {
-      nodeStream.on('data', (chunk: Buffer) => controller.enqueue(chunk));
-      nodeStream.on('end', () => controller.close());
-      nodeStream.on('error', (err: Error) => controller.error(err));
-    },
-    cancel() {
-      nodeStream.destroy();
-    },
-  }) as unknown as ReadableStream;
-}
+// Serve lcu:// URLs to the renderer by proxying them to the LCU HTTPS API
+// with proper Basic auth. Uses node's https (rejectUnauthorized: false)
+// because the LCU presents Riot's self-signed certificate, which
+// Electron's net.fetch rejects with ERR_CERT_AUTHORITY_INVALID.
+
+const requestLcu = (target: URL, method: string, headers: Headers) =>
+  new Promise<{ status: number; contentType: string; body: Buffer }>(
+    (resolve, reject) => {
+      const req = httpsRequest(
+        {
+          hostname: target.hostname,
+          port: target.port,
+          path: target.pathname + target.search,
+          method,
+          rejectUnauthorized: false,
+          headers: Object.fromEntries(headers.entries()),
+        },
+        res => {
+          const chunks: Buffer[] = [];
+          res.on('data', (chunk: Buffer) => chunks.push(chunk));
+          res.on('end', () =>
+            resolve({
+              status: res.statusCode || 502,
+              contentType: res.headers['content-type'] || 'application/octet-stream',
+              body: Buffer.concat(chunks),
+            })
+          );
+        }
+      );
+      req.on('error', reject);
+      req.end();
+    }
+  );
 
 app.on('ready', () => {
   protocol.handle('lcu', async (request: Request): Promise<Response> => {
@@ -33,7 +55,7 @@ app.on('ready', () => {
     // request.url looks like lcu:///lol-game-data/assets/...
     const path = request.url.slice('lcu://'.length);
 
-    const target = `https://127.0.0.1:${port}${path}`;
+    const target = new URL(`https://127.0.0.1:${port}${path}`);
 
     try {
       const headers = new Headers(request.headers);
@@ -42,13 +64,19 @@ app.on('ready', () => {
         `Basic ${Buffer.from(`riot:${password}`).toString('base64')}`
       );
 
-      const response = await net.fetch(target, {
-        method: request.method,
-        headers,
-        body: request.body,
-      });
+      const { status, contentType, body } = await requestLcu(
+        target,
+        request.method,
+        headers
+      );
 
-      return response;
+      return new Response(
+        Readable.toWeb(Readable.from(body)) as unknown as ReadableStream,
+        {
+          status,
+          headers: { 'Content-Type': contentType },
+        }
+      );
     } catch (e) {
       logger.error('lcu:// proxy error', e);
       return new Response('LCU proxy error', { status: 502 });

@@ -1,6 +1,6 @@
 import React, { FC, memo, Fragment } from 'react';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 interface Action {
   text: string;

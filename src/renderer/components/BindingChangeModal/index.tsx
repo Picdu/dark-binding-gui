@@ -8,7 +8,7 @@ import { Modal } from '@components/Modal';
 import { eventToSaved, formatSaved } from '@utils/parse-binding';
 import { Button, Checkbox } from 'react-hextech';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 interface Props {
   label: string;

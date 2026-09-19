@@ -8,7 +8,7 @@ import {
 
 import binding from '../binding';
 
-const style = require('./index.scss');
+import style from './index.module.scss';
 
 interface InnerProps {
   value: Binding;

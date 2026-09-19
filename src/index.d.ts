@@ -4,7 +4,7 @@ type Diff<
 > = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
 type Omit<T, K extends string | number | symbol> = Pick<T, Diff<keyof T, K>>;
 
-declare module '*.scss' {
+declare module '*.module.scss' {
   const classNames: { [name: string]: string };
 
   export default classNames;

@@ -7,6 +7,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // Must never bundle the npm electron package in the renderer (it's a
+      // path-lookup shim that crashes the browser bundle); resolve to a
+      // runtime require('electron') instead (nodeIntegration is on).
+      electron: resolve(__dirname, 'src/renderer/electron-shim.ts'),
       '@utils': resolve(__dirname, 'src/common/utils'),
       '@components': resolve(__dirname, 'src/renderer/components'),
       '@containers': resolve(__dirname, 'src/renderer/containers'),

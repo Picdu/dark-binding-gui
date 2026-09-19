@@ -9,7 +9,7 @@ import cx from 'classnames';
 import { ChampionCircle } from '@components/ChampionCircle';
 import { ContextMenuConsumer } from '../../containers/ContextMenu';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 interface GroupItemProps {
   className?: string;

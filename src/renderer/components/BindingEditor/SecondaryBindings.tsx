@@ -6,7 +6,7 @@ import binding from '../../containers/binding';
 
 import bindings from './bindings';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 const Binding = binding(({ value, onClick }) => (
   <a className={styles.bindingButton} onClick={onClick}>

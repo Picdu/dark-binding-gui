@@ -7,6 +7,7 @@ import { isDev } from '@utils/env';
 import './main/lcu-toolkit';
 import { checkForUpdates } from './main/auto-update';
 import './main/binding-manager';
+import { initGroupsBridge } from './main/groups-bridge';
 import { getMainWindow } from './main/main-window';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -20,6 +21,8 @@ log.transports.console.level = isDev
   : minimist(process.argv.slice(2)).loglevel || false;
 
 app.setAppUserModelId('com.jinx.binding');
+
+initGroupsBridge();
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();

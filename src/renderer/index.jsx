@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
-import { webFrame } from 'electron';
 
 import { TitleBar } from '@components/TitleBar';
 
@@ -12,7 +11,8 @@ import store, { history } from './store';
 import routes from './routes';
 import { ContextMenuProvider } from './containers/ContextMenu';
 
-webFrame.registerURLSchemeAsPrivileged('lcu');
+// webFrame.registerURLSchemeAsPrivileged moved to the main process in modern
+// Electron (protocol.registerSchemesAsPrivileged in lcu-toolkit/protocols.ts).
 
 render(
   <Provider store={store}>

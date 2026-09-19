@@ -1,4 +1,3 @@
-import * as os from 'os';
 
 const mac = {
   Escape: '[Esc]',
@@ -315,4 +314,4 @@ export const keys = {
   '[<Unbound>]': '',
 };
 
-export const codes = os.platform() === 'win32' ? windows : mac;
+export const codes = process.platform === 'win32' ? windows : mac;

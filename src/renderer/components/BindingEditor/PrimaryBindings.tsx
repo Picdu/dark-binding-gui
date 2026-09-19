@@ -2,7 +2,7 @@ import React, { FC, memo } from 'react';
 
 import PrimaryHotkey from '../../containers/PrimaryHotkey';
 
-const style = require('./index.scss');
+import style from './index.module.scss';
 
 const sections: Section[] = [
   {

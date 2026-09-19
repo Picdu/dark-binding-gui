@@ -4,7 +4,7 @@ import { RootState } from '@types';
 
 import { lcuStatus } from '@lcu/selectors';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 interface AppProps {
   updateProgress?: number;

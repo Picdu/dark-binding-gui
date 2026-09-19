@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import cx from 'classnames';
 
-const styles = require('./index.scss');
+import styles from './index.module.scss';
 
 interface ChampionCircleProps extends Champion {
   className?: string;

@@ -1,10 +1,9 @@
 // taken directly and from the league client and slightly adapted, for maximum compatibility with the official format
-import * as os from 'os';
 
 import { keys, codes } from './keycode-mapping';
 
 function _isWindows() {
-  return os.platform() === 'win32';
+  return process.platform === 'win32';
 }
 
 function _splitSaved(e) {
