@@ -1,14 +1,19 @@
 import { sortBy } from 'lodash/fp';
 
-import { get, patch } from './fetch';
+import { get, patch, post } from './fetch';
 
 import championsJson from '../../../../static/champions.json';
 
 export const inputSettings = {
+  // v1 is still the only keybind storage in the current client (swagger
+  // 16.17.x confirms it). See docs/input-system-notes.md.
   get: get<InputSettings>('/lol-game-settings/v1/input-settings'),
   patch: patch<InputSettings, InputSettings>(
     '/lol-game-settings/v1/input-settings'
   ),
+  // Explicitly persist settings to disk so a PATCH is not lost if the
+  // client crashes or the input system changes behavior.
+  save: () => post<void, boolean>('/lol-game-settings/v1/save')(undefined),
 };
 
 export const inputSettingsSchema = {
@@ -33,5 +38,7 @@ export const champions = {
 };
 
 export const gameFlow = {
-  phase: () => get<string>('/lol-gameflow/v1/gameflow-phase'),
+  // `get(...)` already returns a thunk that produces the request promise,
+  // so `phase()` must be the thunk itself (not a wrapper returning it).
+  phase: get<string>('/lol-gameflow/v1/gameflow-phase'),
 };

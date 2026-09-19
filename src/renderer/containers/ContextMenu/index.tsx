@@ -23,7 +23,10 @@ interface State {
   menu?: { x: number; y: number; options: ContextMenu };
 }
 
-export class ContextMenuProvider extends PureComponent<{}, State> {
+export class ContextMenuProvider extends PureComponent<
+  { children?: React.ReactNode },
+  State
+> {
   state: State = {};
 
   closeContextMenu = () => {
@@ -73,9 +76,7 @@ export class ContextMenuProvider extends PureComponent<{}, State> {
           options={this.state.menu.options as any}
           onChange={this.handleMenuOptionClick}
           onToggle={this.closeContextMenu}
-        >
-          Options
-        </Dropdown>
+        />
       </div>
     );
   };

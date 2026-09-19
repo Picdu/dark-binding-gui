@@ -5,6 +5,7 @@ const styles = require('./index.scss');
 
 interface ExpandProps {
   title?: string;
+  children?: React.ReactNode;
 }
 
 export class Expand extends PureComponent<ExpandProps> {

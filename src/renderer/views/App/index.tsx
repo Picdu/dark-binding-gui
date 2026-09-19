@@ -9,9 +9,16 @@ const styles = require('./index.scss');
 interface AppProps {
   updateProgress?: number;
   lcuStatus: ReturnType<typeof lcuStatus>;
+  inputMode?: InputMode;
+  children?: React.ReactNode;
 }
 
-const App: FC<AppProps> = ({ lcuStatus, updateProgress, children }) => {
+const App: FC<AppProps> = ({
+  lcuStatus,
+  updateProgress,
+  inputMode,
+  children,
+}) => {
   if (updateProgress) {
     return (
       <div className={styles.app}>
@@ -20,7 +27,24 @@ const App: FC<AppProps> = ({ lcuStatus, updateProgress, children }) => {
     );
   }
 
-  if (lcuStatus === 'loggedIn') return <Fragment>{children}</Fragment>;
+  if (lcuStatus === 'loggedIn') {
+    return (
+      <Fragment>
+        {inputMode === 'unsupported' && (
+          <div style={{
+            padding: '8px 16px',
+            background: '#c8aa6e',
+            color: '#091428',
+            fontWeight: 'bold',
+          }}>
+            Riot changed the input system - binding auto-switch is disabled
+            until Dark Binding is updated.
+          </div>
+        )}
+        {children}
+      </Fragment>
+    );
+  }
 
   return (
     <div className={styles.app}>
@@ -33,7 +57,8 @@ const App: FC<AppProps> = ({ lcuStatus, updateProgress, children }) => {
   );
 };
 
-export default connect<AppProps, {}, {}, RootState>(state => ({
+export default connect((state: RootState) => ({
   lcuStatus: lcuStatus(state),
   updateProgress: state.lcu.updateProgress,
+  inputMode: state.lcu.inputMode,
 }))(App);

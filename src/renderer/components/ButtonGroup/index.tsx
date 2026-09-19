@@ -5,6 +5,7 @@ const style = require('./index.scss');
 
 interface ButtonGroupProps {
   className?: string;
+  children?: React.ReactNode;
 }
 
 export const ButtonGroup: FC<ButtonGroupProps> = ({ className, children }) => (

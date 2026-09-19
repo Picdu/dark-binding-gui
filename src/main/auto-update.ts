@@ -1,69 +1,32 @@
 import { dialog, BrowserWindow, shell } from 'electron';
-import os from 'os';
-import logger from 'electron-log';
-import { autoUpdater } from 'electron-updater';
 
 import { isDev } from '@utils/env';
-import { broadcast } from './utils';
+import { getMainWindow } from './main-window';
 
-autoUpdater.autoDownload = false;
-autoUpdater.logger = logger;
-
-const promptUpdate = (wnd: BrowserWindow) =>
-  !dialog.showMessageBox(wnd, {
-    title: 'New Update',
-    message:
-      'A new update is available, would you like to install it?\nVisit https://github.com/s-coimbra21/dark-binding-gui/releases for release notes',
-    buttons: ['Yes', 'No'],
-    defaultId: 0,
-  });
-
-export function checkForUpdates(mainWindow: BrowserWindow) {
+/**
+ * There is no update server configured for this fork; point users at the
+ * releases page instead of shipping a half-wired auto-updater.
+ */
+export function checkForUpdates() {
   if (isDev) {
     return;
   }
 
-  const platform = os.platform();
-  if (platform === 'linux') {
-    // ¯\_(ツ)_/¯ sorry blitzcrankBot
-    return;
-  }
+  const wnd: BrowserWindow = getMainWindow();
 
-  autoUpdater.addListener('update-available', () => {
-    logger.silly('New update available');
-
-    if (promptUpdate(mainWindow)) {
-      if (platform === 'darwin') {
+  dialog
+    .showMessageBox(wnd, {
+      title: 'Dark Binding',
+      message:
+        'Check the releases page for new versions of Dark Binding.',
+      buttons: ['Open Releases Page', 'OK'],
+      defaultId: 0,
+    })
+    .then(result => {
+      if (result.response === 0) {
         shell.openExternal(
           'https://github.com/s-coimbra21/dark-binding-gui/releases'
         );
-
-        return;
       }
-
-      autoUpdater.downloadUpdate();
-    }
-  });
-
-  autoUpdater.addListener('update-not-available', () => {
-    logger.silly('No new updates');
-  });
-
-  autoUpdater.addListener('update-downloaded', () => {
-    logger.silly('Quitting to install new update');
-
-    autoUpdater.quitAndInstall();
-  });
-
-  autoUpdater.addListener('download-progress', progress => {
-    logger.silly('Update Progress', progress);
-
-    broadcast('lcu-sync', { updateProgress: progress.percent });
-  });
-
-  autoUpdater.addListener('error', error => {
-    logger.error(error);
-  });
-
-  autoUpdater.checkForUpdates();
+    });
 }

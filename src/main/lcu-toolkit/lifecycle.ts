@@ -14,10 +14,12 @@ monitor.on('connect', (credentials: Credentials) => {
   broadcast('lcu-sync', { credentials });
 });
 
-monitor.on('login', ({ summoner, gameFlow, champions }) => {
+monitor.on('login', ({ summoner, gameFlow, champions, inputMode }) => {
   logger.debug('LCU logged in, ready to handle requests');
 
-  broadcast('lcu-sync', { summoner, gameFlow, champions });
+  monitor.state.inputMode = inputMode;
+
+  broadcast('lcu-sync', { summoner, gameFlow, champions, inputMode });
 });
 
 monitor.on('gameFlow', gameFlow => {
@@ -40,5 +42,4 @@ ipcMain.on('lcu-hydrate', (event: { sender: WebContents }) => {
   webContents.send('lcu-sync', monitor.state);
 });
 
-// @ts-ignore
 monitor.start();

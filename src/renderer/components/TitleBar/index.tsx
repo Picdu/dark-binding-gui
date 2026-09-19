@@ -1,13 +1,17 @@
 import React, { FC, memo } from 'react';
-import { remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import cx from 'classnames';
 
 const styles = require('./index.scss');
 
-const close = () => remote.getCurrentWindow().close();
-const minimize = () => remote.getCurrentWindow().minimize();
+const close = () => ipcRenderer.send('window-close');
+const minimize = () => ipcRenderer.send('window-minimize');
 
-export const TitleBar: FC = memo(({ children }) => (
+interface TitleBarProps {
+  children?: React.ReactNode;
+}
+
+export const TitleBar: FC<TitleBarProps> = memo(({ children }) => (
   <div className={styles.app}>
     <div className={styles.titleBar}>
       <div className={styles.title}>

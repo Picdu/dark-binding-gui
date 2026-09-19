@@ -4,11 +4,12 @@ import cx from 'classnames';
 
 import { ButtonGroup } from '@components/ButtonGroup';
 
-import style from './index.scss';
+const style = require('./index.scss');
 
 interface ModalProps {
   className?: any;
   buttons: ReactNode;
+  children?: ReactNode;
 }
 
 export const Modal: FC<ModalProps> = ({ className, buttons, children }) => (

@@ -12,7 +12,7 @@ import { firstTimeSetup } from './first-time-setup';
 import { broadcast } from './utils';
 
 const replaceConfig = async (group: string) => {
-  const settings = store.get(`groups.${group}`);
+  const settings = store.get(`groups.${group}`) as InputSettings;
   logger.debug(`patching settings from group ${group}`, settings);
 
   if (!settings)
@@ -32,6 +32,13 @@ const replaceConfig = async (group: string) => {
         await api.inputSettings.patch(settings)
       );
 
+      // Explicitly persist to disk so the patched bindings survive a
+      // client crash (older patches auto-saved on exit, newer ones may
+      // not).
+      await api.inputSettings.save().catch(e => {
+        logger.warn('explicit input-settings save failed', e);
+      });
+
       showNotification({
         title: 'Bindings Applied',
         body: `Switched bindings to ${group}`,
@@ -45,7 +52,9 @@ const replaceConfig = async (group: string) => {
   }
 };
 
-const restoreConfig = async (config = store.get('groups.default')) => {
+const restoreConfig = async (
+  config = store.get('groups.default') as InputSettings
+) => {
   logger.debug('restoring settings');
   const lockPath = join(app.getPath('userData'), 'lock');
 
@@ -53,7 +62,7 @@ const restoreConfig = async (config = store.get('groups.default')) => {
     const isLocked = await fs.pathExists(lockPath);
     if (isLocked) {
       const group = await fs.readFile(lockPath, 'utf8');
-      const nextSettings = await api.inputSettings.get();
+      const nextSettings = (await api.inputSettings.get()) as InputSettings;
 
       logger.debug(`syncing settings for group ${group}`, nextSettings);
 
@@ -85,8 +94,21 @@ const restoreConfig = async (config = store.get('groups.default')) => {
   }
 };
 
-monitor.on('login', ({ settings }) => {
-  firstTimeSetup(settings);
+monitor.on('login', ({ settings, inputMode }) => {
+  if (inputMode === 'unsupported') {
+    logger.warn(
+      'Input system changed on this client - binding auto-switch disabled'
+    );
+
+    dialog.showErrorBox(
+      'Dark Binding',
+      "Riot changed the input system on this League patch.\n\n" +
+        'Binding auto-switch is disabled until Dark Binding is updated ' +
+        'for the new format. Everything else works.'
+    );
+  }
+
+  if (settings) firstTimeSetup(settings);
 
   logger.debug('Binding Manager started');
 

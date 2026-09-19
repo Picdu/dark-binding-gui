@@ -1,7 +1,14 @@
-import { createAction } from 'typesafe-actions';
+// Minimal action creators (replaced typesafe-actions 3.x, which is ESM-only in v5).
 
-export const up = createAction('@@lcu/up', resolve => (settings: LCUState) =>
-  resolve(settings)
-);
+export const up = (payload: LCUState) => ({
+  type: '@@lcu/up' as const,
+  payload,
+});
 
-export const down = createAction('@@lcu/down');
+(up as any).getType = () => '@@lcu/up';
+
+export const down = () => ({
+  type: '@@lcu/down' as const,
+});
+
+(down as any).getType = () => '@@lcu/down';

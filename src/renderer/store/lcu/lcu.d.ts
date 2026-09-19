@@ -1,8 +1,11 @@
+declare type InputMode = 'v1' | 'unsupported';
+
 declare interface LCUState {
   credentials?: Credentials;
   summoner?: number;
   champions: Champions;
   gameFlow: string;
+  inputMode?: InputMode;
   updateProgress?: number;
 }
 

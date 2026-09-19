@@ -1,17 +1,16 @@
 import { BrowserWindow } from 'electron';
 import * as path from 'path';
-import { format as formatUrl } from 'url';
-import installExtension, {
-  REACT_DEVELOPER_TOOLS,
-  REDUX_DEVTOOLS,
-} from 'electron-devtools-installer';
 
 import { getInitialWindowDimensions } from './window-scale';
+
+// Injected as build-time defines by @electron-forge/plugin-vite
+declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
+declare const MAIN_WINDOW_VITE_NAME: string;
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
-let mainWindow: BrowserWindow | void;
+let mainWindow: BrowserWindow | undefined;
 
 export function getMainWindow() {
   if (mainWindow) return mainWindow;
@@ -19,12 +18,10 @@ export function getMainWindow() {
   const { dimensions, scale } = getInitialWindowDimensions();
 
   const window = new BrowserWindow({
-    show: isDevelopment,
+    show: false,
     width: dimensions.width,
-    //  maxWidth: 1600,
     minWidth: 1024,
     height: dimensions.height,
-    //  maxHeight: 900,
     minHeight: 540,
     frame: false,
     resizable: false,
@@ -32,29 +29,20 @@ export function getMainWindow() {
     hasShadow: false,
     webPreferences: {
       zoomFactor: scale,
+      contextIsolation: false,
       nodeIntegration: true,
       webSecurity: false,
       allowRunningInsecureContent: true,
-      webaudio: false,
-      webgl: false,
     },
   });
 
-  if (isDevelopment) {
-    installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS]).then(() =>
-      window.webContents.openDevTools()
-    );
-  }
-
-  if (isDevelopment) {
-    window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`);
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    // Forge Vite dev server (injected as a build-time define)
+    window.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    window.loadURL(
-      formatUrl({
-        pathname: path.join(__dirname, 'index.html'),
-        protocol: 'file',
-        slashes: true,
-      })
+    // Production: renderer bundle from the Forge Vite plugin
+    window.loadFile(
+      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
     );
   }
 

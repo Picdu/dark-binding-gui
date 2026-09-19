@@ -1,14 +1,28 @@
 {
-  "extends": "./node_modules/electron-webpack/tsconfig-base.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "jsx": "react",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noImplicitAny": false,
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "@utils/*": ["src/common/utils/*"],
       "@components/*": ["src/renderer/components/*"],
-      "@*": ["src/renderer/store/*"]
-    }
-  }
+      "@containers/*": ["src/renderer/containers/*"],
+      "@lcu/*": ["src/renderer/store/lcu/*"],
+      "@groups/*": ["src/renderer/store/groups/*"],
+      "@bindings/*": ["src/renderer/store/bindings/*"],
+      "@types": ["src/renderer/store/types.ts"]
+    },
+    "noEmit": true
+  },
+  "include": ["src", "forge.config.ts", "vite.main.config.ts", "vite.renderer.config.ts"]
 }

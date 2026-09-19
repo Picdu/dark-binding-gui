@@ -1,34 +1,54 @@
-import { createStandardAction, createAction } from 'typesafe-actions';
 import { Dispatch } from 'redux';
 import { RootState } from '@types';
 import { replace } from 'connected-react-router';
 
-export const addGroup = createStandardAction('@@groups/addGroup')<{
-  group?: BindingGroup;
-  name: string;
-}>();
+// Minimal action creators (replaced typesafe-actions 3.x, which is ESM-only in v5).
 
-export const renameGroup = createStandardAction('@@groups/renameGroup')<{
+export const addGroup = (payload: { group?: BindingGroup; name: string }) => ({
+  type: '@@groups/addGroup' as const,
+  payload,
+});
+(addGroup as any).getType = () => '@@groups/addGroup';
+
+export const renameGroup = (payload: {
   oldName: string;
   nextName: string;
-}>();
+}) => ({
+  type: '@@groups/renameGroup' as const,
+  payload,
+});
+(renameGroup as any).getType = () => '@@groups/renameGroup';
 
-export const deleteGroup = createStandardAction('@@groups/deleteGroup')<
-  string
->();
+export const deleteGroup = (payload: string) => ({
+  type: '@@groups/deleteGroup' as const,
+  payload,
+});
+(deleteGroup as any).getType = () => '@@groups/deleteGroup';
 
-export const loadGroups = createStandardAction('@@groups/loadGroups')();
+export const loadGroups = () => ({
+  type: '@@groups/loadGroups' as const,
+});
+(loadGroups as any).getType = () => '@@groups/loadGroups';
 
-export const saveGroups = createStandardAction('@@groups/saveGroups')();
+export const saveGroups = () => ({
+  type: '@@groups/saveGroups' as const,
+});
+(saveGroups as any).getType = () => '@@groups/saveGroups';
 
-export const updateDefaultGroup = createStandardAction(
-  '@@groups/updateDefaultGroup'
-)<InputSettings>();
+export const updateDefaultGroup = (payload: InputSettings) => ({
+  type: '@@groups/updateDefaultGroup' as const,
+  payload,
+});
+(updateDefaultGroup as any).getType = () => '@@groups/updateDefaultGroup';
 
-export const assignChampion = createStandardAction('@@groups/assignChampion')<{
+export const assignChampion = (payload: {
   championId: number;
   group: string;
-}>();
+}) => ({
+  type: '@@groups/assignChampion' as const,
+  payload,
+});
+(assignChampion as any).getType = () => '@@groups/assignChampion';
 
 export const discardChanges = (redirect?: string) => (
   dispatch: Dispatch,
@@ -94,18 +114,19 @@ export const createGroup = (groupName: string) => (
   dispatch(saveGroups());
 };
 
-export const changeBinding = createAction(
-  '@@groups/changeBinding',
-  resolve => (
-    groupName: string,
-    path: string,
-    value: Binding[],
-    allowDuplicates = false
-  ) => resolve({ groupName, path, value, allowDuplicates })
-);
+export const changeBinding = (
+  groupName: string,
+  path: string,
+  value: Binding[],
+  allowDuplicates = false
+) => ({
+  type: '@@groups/changeBinding' as const,
+  payload: { groupName, path, value, allowDuplicates },
+});
+(changeBinding as any).getType = () => '@@groups/changeBinding';
 
-export const changeQuickcast = createAction(
-  '@@groups/changeQuickcast',
-  resolve => (groupName: string, dataKey: string) =>
-    resolve({ groupName, dataKey })
-);
+export const changeQuickcast = (groupName: string, dataKey: string) => ({
+  type: '@@groups/changeQuickcast' as const,
+  payload: { groupName, dataKey },
+});
+(changeQuickcast as any).getType = () => '@@groups/changeQuickcast';

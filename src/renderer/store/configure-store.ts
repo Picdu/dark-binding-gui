@@ -17,19 +17,17 @@ export const history = createHashHistory();
 const routerMiddleware = createRouterMiddleware(history);
 
 const enhancer = compose(
-  applyMiddleware(routerMiddleware, thunkMiddleware, loggerMiddleware)
+  applyMiddleware(
+    routerMiddleware as any,
+    thunkMiddleware as any,
+    loggerMiddleware as any
+  )
 );
 
 export default function configureStore(initialState: Partial<RootState>) {
   const rootReducer = createRootReducer(history);
 
   const store = createStore(rootReducer, initialState, enhancer);
-
-  if (module.hot) {
-    module.hot.accept('./reducers', () =>
-      store.replaceReducer(require('./reducers').createRootReducer(history))
-    );
-  }
 
   return store;
 }

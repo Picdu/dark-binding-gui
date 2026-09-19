@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import cx from 'classnames';
 
-import style from './index.scss';
+const style = require('./index.scss');
 
 interface ChampionTileProps extends Champion {
   className?: string;

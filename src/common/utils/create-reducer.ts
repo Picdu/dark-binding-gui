@@ -1,47 +1,33 @@
 import { Reducer, AnyAction } from 'redux';
-import { ActionType, getType } from 'typesafe-actions';
-import { ActionCreator, StringOrSymbol } from 'typesafe-actions/dist/types';
 
-type ActionMap = { [key: string]: ActionType<any> };
-type Handlers<S, T extends ActionMap> = {
-  [K in keyof T]?: T[K] extends ActionCreator<StringOrSymbol>
-    ? (
-        prevState: S,
-        payload: ReturnType<T[K]>['payload'],
-        meta: ReturnType<T[K]>['meta']
-      ) => S
-    : T[K] extends object
-    ? Handlers<S, T[K]>
-    : never
-};
+/**
+ * Minimal loose-typed reducer factory.
+ * Action creators are plain functions returning {type, payload}
+ * with a `.type` property attached.
+ */
+type Handler<S> = (state: S, payload: any, meta: any) => S;
 
-export function createReducer<S, T extends ActionMap>(
+export function createReducer<S>(
   initialState: S | undefined,
-  actions: T
-): (handlers: Handlers<S, T>) => Reducer<S, ActionType<T>> {
+  actions: Record<string, any>
+): (handlers: Record<string, Handler<S>>) => Reducer<S, AnyAction> {
   return handlers => {
-    const actionTypes: any = {};
+    const actionTypes: Record<string, Handler<S>> = {};
 
-    const processHandlers = (handlerGroup: any) => {
-      Object.keys(actions).forEach(key => {
-        if (typeof handlerGroup[key] === 'object') {
-          return Object.assign(actionTypes, processHandlers(handlerGroup[key]));
-        }
+    Object.keys(handlers).forEach(key => {
+      const creator = actions[key];
 
-        if (!handlerGroup[key]) return;
+      if (!creator) return;
 
-        actionTypes[getType(actions[key])] = handlerGroup[key];
-      });
-    };
+      const type = typeof creator.getType === 'function' ? creator.getType() : creator.type;
 
-    processHandlers(handlers);
+      if (type) actionTypes[type] = handlers[key];
+    });
 
     return (state: S | undefined = initialState, action: AnyAction) => {
-      if (actionTypes[action.type]) {
-        return actionTypes[action.type](state, action.payload, action.meta);
-      }
+      const handler = actionTypes[action.type];
 
-      return state;
+      return handler ? handler(state, action.payload, action.meta) : state;
     };
   };
 }

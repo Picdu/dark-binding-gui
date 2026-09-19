@@ -72,6 +72,7 @@ declare module 'react-hextech' {
 declare interface Credentials {
   port: number;
   password: string;
+  protocol?: string;
 }
 
 declare namespace NodeJS {

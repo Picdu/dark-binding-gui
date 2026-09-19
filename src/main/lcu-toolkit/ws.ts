@@ -1,6 +1,8 @@
 import WebSocket from 'ws';
 import logger from 'electron-log';
 import { Connector } from './connector';
+import { join } from 'path';
+import { readFile } from 'fs-extra';
 
 export type EventType = 'Create' | 'Update' | 'Delete';
 
@@ -24,10 +26,11 @@ export class LeagueMonitor extends Connector {
   public state: LCUState = {
     champions: [],
     gameFlow: 'None',
+    inputMode: undefined,
   };
   private socket?: WebSocket;
   private connected = false;
-  private watchTimer?: NodeJS.Timer;
+  private watchTimer?: NodeJS.Timeout;
 
   constructor() {
     super();
@@ -35,11 +38,6 @@ export class LeagueMonitor extends Connector {
     this.on('connect', (settings: Credentials) => {
       this.lockfile = settings;
       this.state.credentials = settings;
-
-      // Check if league is running every 5s.
-      this.watchTimer = setInterval(() => {
-        if (!this.connected) this.monitor_connect();
-      }, 5000);
 
       this.monitor_connect();
 
@@ -72,7 +70,9 @@ export class LeagueMonitor extends Connector {
     if (!this.lockfile || this.connected) return;
 
     this.socket = new WebSocket(
-      `wss://riot:${this.lockfile!.password}@127.0.0.1:${this.lockfile!.port}`,
+      `wss://riot:${encodeURIComponent(this.lockfile!.password)}@127.0.0.1:${
+        this.lockfile!.port
+      }`,
       'wamp',
       { rejectUnauthorized: false }
     );
@@ -133,7 +133,7 @@ export class LeagueMonitor extends Connector {
   };
 
   private onSocketError = async () => {
-    this.socket!.terminate();
+    if (this.socket) this.socket.terminate();
   };
 }
 

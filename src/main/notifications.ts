@@ -14,13 +14,17 @@ import logger from 'electron-log';
 
 const isWin = platform() === 'win32';
 
+// __static was an electron-webpack define; with Vite we resolve the icon
+// relative to the app root ourselves.
 const icon = nativeImage.createFromPath(
-  join(__static, isWin ? 'icons/dark-binding.png' : 'icons/16.png')
+  app.isPackaged
+    ? join(process.resourcesPath!, 'icons/dark-binding.png')
+    : join(app.getAppPath(), 'static/icons/dark-binding.png')
 );
 
-export let tray = new Tray(icon);
-
 const launcher = new AutoLauncher({ name: 'Dark Binding' });
+
+export let tray: Tray | undefined;
 
 const contextMenu = Menu.buildFromTemplate([
   {
@@ -37,14 +41,18 @@ const contextMenu = Menu.buildFromTemplate([
   { label: 'Exit', type: 'normal', click: () => app.quit() },
 ]);
 
-tray.setToolTip('Manage your League of Legends keybindings');
-
-launcher.isEnabled().then(isEnabled => {
-  logger.debug(`current run on startup status: ${isEnabled}`);
-
-  contextMenu.items[1].checked = isEnabled;
-
+// Tray (and Notification) may only be created after app is ready.
+app.on('ready', () => {
+  tray = new Tray(icon);
+  tray.setToolTip('Manage your League of Legends keybindings');
   tray.setContextMenu(contextMenu);
+
+  launcher.isEnabled().then(isEnabled => {
+    logger.debug(`current run on startup status: ${isEnabled}`);
+
+    contextMenu.items[1].checked = isEnabled;
+    tray!.setContextMenu(contextMenu);
+  });
 });
 
 app.on('window-all-closed', () => {
@@ -65,12 +73,8 @@ export function showNotification(options: NotificationConstructorOptions) {
 async function handleRunOnStartClick() {
   const status = contextMenu.items[1].checked;
 
-  logger.debug(`Changing run on startup starting to ${status}`);
+  logger.debug(`Changing run on startup status to ${status}`);
 
   if (!status) await launcher.disable();
   if (status) await launcher.enable();
 }
-
-setInterval(() => {
-  if (tray.isDestroyed()) tray = new Tray(icon);
-}, 30000);

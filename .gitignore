@@ -1,5 +1,9 @@
 .DS_Store
 dist/
+dist-electron/
+.vite/
+out/
 node_modules/
 thumbs.db
 *.log
+package-lock.json
