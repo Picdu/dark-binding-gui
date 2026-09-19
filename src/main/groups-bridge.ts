@@ -5,8 +5,7 @@
  *
  * Renderer -> main:
  *   groups-save  (payload: { groups, championGroups })  on every save
- * Main -> renderer:
- *   groups-load  (payload: { groups, championGroups })  on startup
+ *   groups-hydrate (sync) -> returns { groups, championGroups }
  */
 import { ipcMain } from 'electron';
 
@@ -30,8 +29,3 @@ export const initGroupsBridge = () => {
     };
   });
 };
-
-export const loadPersistedGroups = () => ({
-  groups: store.get('groups', {}),
-  championGroups: store.get('championGroups', {}),
-});

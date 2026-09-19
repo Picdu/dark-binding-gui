@@ -1,19 +1,18 @@
 import { ipcRenderer } from 'electron';
 
 import configureStore, { history } from './configure-store';
+import { fetchPersistedGroups, savePersistedGroups } from '../groups-ipc';
 import * as lcu from '@lcu/actions';
 import * as groups from '@groups/actions';
 
-// Hydrate persisted groups from the main process synchronously so the redux
-// initialState has them before the first render.
-(window as any).__persistedGroups =
-  (window as any).__persistedGroups || ipcRenderer.sendSync('groups-hydrate');
-
-const store = configureStore({});
-
-// Seed the groups reducer from the hydrated data — without this the initial
-// state is empty and the first save would wipe all persisted groups.
-store.dispatch(groups.loadGroups());
+// Fetch persisted groups from the main process synchronously so the redux
+// initialState carries them before the first render.
+const store = configureStore({
+  groups: {
+    hasChanges: false,
+    ...fetchPersistedGroups(),
+  },
+});
 
 ipcRenderer.on('lcu-sync', (evt: any, state: LCUState) => {
   store.dispatch(lcu.up(state));
@@ -30,8 +29,10 @@ ipcRenderer.on(
   }
 );
 
+// After a game the main process re-synced the played group on disk; reload
+// it into the store from the freshly fetched disk state.
 ipcRenderer.on('lcu-input-settings', () => {
-  store.dispatch(groups.loadGroups());
+  store.dispatch(groups.loadGroups(fetchPersistedGroups()));
 });
 
 ipcRenderer.send('lcu-hydrate');

@@ -25,8 +25,12 @@ export const deleteGroup = (payload: string) => ({
 });
 (deleteGroup as any).getType = () => '@@groups/deleteGroup';
 
-export const loadGroups = () => ({
+export const loadGroups = (payload?: {
+  groups: Record<string, InputSettings>;
+  championGroups: Record<string | number, string>;
+}) => ({
   type: '@@groups/loadGroups' as const,
+  payload,
 });
 (loadGroups as any).getType = () => '@@groups/loadGroups';
 

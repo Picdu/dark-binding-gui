@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import '~react-hextech/lib/theme.scss';
 
 $active-color: rgb(70, 55, 20);
@@ -83,8 +84,8 @@ $active-color: rgb(70, 55, 20);
   &:hover:not(:active) {
     background: linear-gradient(
       to bottom,
-      lighten(rgb(129, 112, 76), 35%) 0%,
-      lighten(rgb(71, 57, 33), 35%) 100%
+      color.adjust(rgb(129, 112, 76), $lightness: 35%) 0%,
+      color.adjust(rgb(71, 57, 33), $lightness: 35%) 100%
     );
 
     .background {
@@ -97,7 +98,7 @@ $active-color: rgb(70, 55, 20);
     }
 
     .spacer {
-      background: lighten(rgb(89, 71, 40), 35%);
+      background: color.adjust(rgb(89, 71, 40), $lightness: 35%);
     }
   }
 
